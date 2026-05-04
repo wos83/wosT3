@@ -1,14 +1,10 @@
 package com.tictactoe.ui.components
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -16,35 +12,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.graphicsLayer
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import com.tictactoe.ui.theme.TicTacToeShapes
-import kotlinx.coroutines.launch
 
 @Composable
-fun GameCell(
+fun PixelGameCell(
     symbol: Char?,
     isWinningCell: Boolean,
     xColor: Color,
@@ -57,80 +39,40 @@ fun GameCell(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val scale = remember { Animatable(if (isPressed) 0.95f else 1f) }
+    val pressScale = remember { Animatable(1f) }
 
     LaunchedEffect(isPressed) {
-        scale.animateTo(
-            targetValue = if (isPressed) 0.92f else 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
+        pressScale.animateTo(
+            targetValue = if (isPressed) 0.85f else 1f,
+            animationSpec = tween(50, easing = LinearEasing)
         )
     }
 
-    val animatedScale by animateFloatAsState(
-        targetValue = scale.value,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "scale"
-    )
+    val cellColor = when {
+        isWinningCell -> Color(0xFF4a4a4a)
+        symbol != null -> Color(0xFF3d3d3d)
+        enabled -> Color(0xFF2d2d2d)
+        else -> Color(0xFF252525)
+    }
 
-    val cellGradient = Brush.verticalGradient(
-        colors = listOf(
-            if (enabled) Color(0xFFFAFAFA) else Color(0xFFF0F0F0),
-            if (enabled) Color(0xFFE8E8E8) else Color(0xFFE0E0E0),
-            if (enabled) Color(0xFFFFFFFF) else Color(0xFFF5F5F5)
-        )
-    )
-
-    val winningGlow = if (isWinningCell) {
-        Brush.radialGradient(
-            colors = listOf(
-                xColor.copy(alpha = 0.3f),
-                oColor.copy(alpha = 0.3f),
-                Color.Transparent
-            )
-        )
-    } else null
+    val borderColor = when {
+        isWinningCell -> Color(0xFFffff00)
+        else -> Color(0xFF1a1a1a)
+    }
 
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .graphicsLayer {
-                scaleX = animatedScale
-                scaleY = animatedScale
-            }
-            .shadow(
-                elevation = if (isPressed) 2.dp else 6.dp,
-                shape = TicTacToeShapes.cellShape,
-                ambientColor = Color.Black.copy(alpha = 0.1f),
-                spotColor = Color.Black.copy(alpha = 0.15f)
-            )
-            .clip(TicTacToeShapes.cellShape)
-            .background(cellGradient)
+            .padding(2.dp)
+            .background(cellColor)
             .then(
-                if (winningGlow != null) {
-                    Modifier.drawBehind {
-                        drawRect(brush = winningGlow)
-                    }
+                if (isWinningCell) {
+                    Modifier.background(Color.Black.copy(alpha = 0.3f))
                 } else Modifier
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.8f),
-                        Color.Gray.copy(alpha = 0.2f)
-                    )
-                ),
-                shape = TicTacToeShapes.cellShape
             )
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = MaterialTheme.colorScheme.primary),
+                indication = null,
                 enabled = enabled && symbol == null,
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -140,20 +82,55 @@ fun GameCell(
         contentAlignment = Alignment.Center
     ) {
         if (symbol != null) {
-            AnimatedSymbol(
+            PixelSymbol(
                 symbol = symbol,
                 xColor = xColor,
-                oColor = oColor
+                oColor = oColor,
+                isWinning = isWinningCell
+            )
+        }
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(2.dp)
+        ) {
+            val pixelSize = 4f
+
+            drawLine(
+                color = borderColor,
+                start = Offset(0f, 0f),
+                end = Offset(size.width, 0f),
+                strokeWidth = pixelSize
+            )
+            drawLine(
+                color = borderColor,
+                start = Offset(0f, size.height - pixelSize),
+                end = Offset(size.width, size.height - pixelSize),
+                strokeWidth = pixelSize
+            )
+            drawLine(
+                color = borderColor,
+                start = Offset(0f, 0f),
+                end = Offset(0f, size.height),
+                strokeWidth = pixelSize
+            )
+            drawLine(
+                color = borderColor,
+                start = Offset(size.width - pixelSize, 0f),
+                end = Offset(size.width - pixelSize, size.height),
+                strokeWidth = pixelSize
             )
         }
     }
 }
 
 @Composable
-private fun AnimatedSymbol(
+private fun PixelSymbol(
     symbol: Char,
     xColor: Color,
-    oColor: Color
+    oColor: Color,
+    isWinning: Boolean
 ) {
     val progress = remember { Animatable(0f) }
 
@@ -163,65 +140,107 @@ private fun AnimatedSymbol(
             targetValue = 1f,
             animationSpec = tween(
                 durationMillis = 400,
-                easing = FastOutSlowInEasing
+                easing = LinearEasing
             )
         )
     }
 
-    val color = if (symbol == 'X') xColor else oColor
-
     Canvas(
         modifier = Modifier
-            .fillMaxSize(0.6f)
-            .padding(8.dp)
+            .fillMaxSize(0.85f)
+            .padding(4.dp)
     ) {
-        val strokeWidth = size.minDimension * 0.12f
-        val progressValue = progress.value
+        val color = if (symbol == 'X') xColor else oColor
+
+        if (isWinning) {
+            drawRect(
+                color = Color.White.copy(alpha = 0.2f),
+                topLeft = Offset.Zero,
+                size = size
+            )
+        }
 
         if (symbol == 'X') {
-            val pathSize = size.minDimension * 0.8f
-            val offset = (size.width - pathSize) / 2
-
-            val path1 = Path().apply {
-                moveTo(offset, offset)
-                lineTo(offset + pathSize, offset + pathSize)
-            }
-            val path2 = Path().apply {
-                moveTo(offset + pathSize, offset)
-                lineTo(offset, offset + pathSize)
-            }
-
-            drawPath(
-                path = path1,
-                color = color.copy(alpha = progressValue),
-                style = Stroke(
-                    width = strokeWidth,
-                    cap = StrokeCap.Round
-                )
-            )
-
-            val startProgress = progressValue * 0.5f
-            if (startProgress > 0) {
-                drawPath(
-                    path = path2,
-                    color = color.copy(alpha = startProgress),
-                    style = Stroke(
-                        width = strokeWidth,
-                        cap = StrokeCap.Round
-                    )
-                )
-            }
+            drawPixelX(color, progress.value)
         } else {
-            val center = Offset(size.width / 2, size.height / 2)
-            val radius = size.minDimension * 0.35f
-
-            drawCircle(
-                color = color.copy(alpha = progressValue),
-                radius = radius * progressValue,
-                center = center,
-                style = Stroke(width = strokeWidth)
-            )
+            drawPixelO(color, progress.value)
         }
     }
 }
 
+private fun DrawScope.drawPixelX(color: Color, progress: Float) {
+    val centerX = size.width / 2
+    val centerY = size.height / 2
+    val maxRadius = size.minDimension * 0.4f
+
+    val steps = 8
+    val currentStep = (progress * steps).toInt().coerceIn(0, steps)
+
+    val pixelSize = maxRadius / 2.5f
+
+    for (step in 0 until currentStep) {
+        val stepProgress = step.toFloat() / steps
+
+        val dist1 = stepProgress * maxRadius
+        drawRect(
+            color = color,
+            topLeft = Offset(centerX - dist1 - pixelSize/2, centerY - pixelSize/2),
+            size = androidx.compose.ui.geometry.Size(pixelSize, pixelSize)
+        )
+
+        if (progress > 0.4f) {
+            val line2Progress = ((progress - 0.4f) / 0.6f * steps).toInt()
+            if (step <= line2Progress) {
+                val dist2 = stepProgress * maxRadius
+                drawRect(
+                    color = color,
+                    topLeft = Offset(centerX + dist2 - pixelSize/2, centerY - pixelSize/2),
+                    size = androidx.compose.ui.geometry.Size(pixelSize, pixelSize)
+                )
+            }
+        }
+    }
+
+    if (progress > 0.8f) {
+        val centerPixelSize = pixelSize * 0.9f
+        drawRect(
+            color = color.copy(alpha = 0.3f),
+            topLeft = Offset(centerX - centerPixelSize/2, centerY - centerPixelSize/2),
+            size = androidx.compose.ui.geometry.Size(centerPixelSize, centerPixelSize)
+        )
+    }
+}
+
+private fun DrawScope.drawPixelO(color: Color, progress: Float) {
+    val centerX = size.width / 2
+    val centerY = size.height / 2
+    val radius = size.minDimension * 0.35f
+
+    val steps = 10
+    val currentStep = (progress * steps).toInt().coerceIn(0, steps)
+
+    val pixelSize = radius / 2f
+
+    for (step in 0 until currentStep) {
+        val angle = (step.toFloat() / steps) * 360f - 90f
+        val angleRad = Math.toRadians(angle.toDouble())
+
+        val x = centerX + (radius * kotlin.math.cos(angleRad)).toFloat()
+        val y = centerY + (radius * kotlin.math.sin(angleRad)).toFloat()
+
+        drawRect(
+            color = color,
+            topLeft = Offset(x - pixelSize/2, y - pixelSize/2),
+            size = androidx.compose.ui.geometry.Size(pixelSize, pixelSize)
+        )
+    }
+
+    if (progress > 0.9f) {
+        val fillSize = radius * 0.4f
+        drawRect(
+            color = color.copy(alpha = 0.15f),
+            topLeft = Offset(centerX - fillSize/2, centerY - fillSize/2),
+            size = androidx.compose.ui.geometry.Size(fillSize, fillSize)
+        )
+    }
+}
