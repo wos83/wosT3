@@ -1,11 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tic Tac Toe</string>
-    <string name="player_x">Player X</string>
-    <string name="player_o">Player O</string>
-    <string name="score">Score</string>
-    <string name="reset_game">Reset Game</string>
-    <string name="draw">Draw!</string>
-    <string name="winner_is">Winner: %s</string>
-    <string name="your_turn">Your Turn</string>
+    <string name="app_name">Jogo da Velha</string>
+    <string name="app_name_full">Tic Tac Toe</string>
+    <string name="player_x">Jogador X</string>
+    <string name="player_o">Jogador O</string>
+    <string name="player_x_wins">Jogador X Venceu!</string>
+    <string name="player_o_wins">Jogador O Venceu!</string>
+    <string name="draw">Empate!</string>
+    <string name="new_game">Novo Jogo</string>
+    <string name="score">Placar</string>
+    <string name="tap_to_play">Toque para jogar</string>
+    <string name="copyright">© 2024 Pixel Labs</string>
 </resources>

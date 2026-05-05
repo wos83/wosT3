@@ -1,3 +1,1 @@
--keepattributes *Annotation*
--keep class * extends androidx.lifecycle.ViewModel { *; }
--keep class * extends androidx.lifecycle.AndroidViewModel { *; }
+# Add project specific ProGuard rules here.
