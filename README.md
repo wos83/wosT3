@@ -1,65 +1,68 @@
-# Tic Tac Toe - Android Game
+# Jogo da Velha - Tic Tac Toe
 
-A modern, high-performance Tic Tac Toe game for Android built with Jetpack Compose and Material Design 3.
+Um aplicativo Android de Jogo da Velha com modo PvP (player vs player) e modo PvE (player vs IA), desenvolvido em Kotlin com Jetpack Compose.
 
-## Features
+## Recursos
 
-- **MVVM Architecture** - Clean separation with ViewModel and StateFlow
-- **Async Processing** - All game logic runs off the main thread using Kotlin Coroutines
-- **Visual Effects** - Hyper-realistic UI with dynamic shadows, gradients, and glassmorphism
-- **Material You** - Dynamic color support (Android 12+)
-- **Animations** - Smooth entry and marking animations with Haptic Feedback
-- **Scoreboard** - Persistent score tracking for two local players
-- **Edge-to-Edge** - Modern full-screen experience
+### Mode de Jogo
+- **PvP (Player vs Player)**: Dois jogadores podem jogar no mesmo dispositivo
+- **PvE (Player vs IA)**: Jogue contra a inteligência artificial
+- **3 Níveis de Dificuldade**: Easy, Medium e Hard
 
-## Requirements
+### Interface
+- **Design Retrô/Neon**: Visual moderno com elementos de霓虹灯
+- **Fonte Pixelify Sans**: Fonte pixelada para completar o estilo retrô
+- **Feedback Visual**: Destaque do jogador atual e linha vencedora
+- **Feedback Tátil**: Vibração ao tocar nas células
+- **Feedback Sonoro**: Sons para movimentos, vitória e empate
 
-- Android SDK 26 (Android 8.0) or higher
-- Android Studio Arctic Fox or newer
-- Kotlin 2.0.21
-- Gradle 8.7+
-- AGP 8.5.0+
+### Funcionalidades
+- Placar persistente entre partidas
+- Indicador de turno atual
+- Detecção automática de vitória e empate
+- Botão "NOVO" para reiniciar a partida
+- Botão "AI" para alternar entre modo PvP e PvE
+- Botão "LVL" para alterar a dificuldade da IA
+- Suporte a Android 7.0+ (API 24+)
 
-## Project Structure
+### Tecnologia
+- Kotlin
+- Jetpack Compose
+- Material Design 3
+- MVVM Architecture
+- Minimax Algorithm para IA
+- Armazenamento local para placar
 
-```
-app/src/main/java/com/tictactoe/
-├── MainActivity.kt          # Entry point with Edge-to-Edge support
-├── viewmodel/
-│   └── TicTacToeViewModel.kt # Game logic with async processing
-└── ui/
-    ├── theme/
-    │   ├── Theme.kt         # Material 3 theming
-    │   └── Typography.kt    # Typography definitions
-    └── components/
-        ├── Board.kt         # Game board component
-        ├── GameCell.kt      # Individual cell with animations
-        └── Scoreboard.kt    # Score display component
-```
+## Como Jogar
 
-## Build
+1. Toque em uma célula vazia para fazer sua jogada
+2. O jogador X sempre começa
+3. O primeiro a formar uma linha de 3 símbolos ganha
+4. Use o botão "NOVO" para iniciar uma nova partida
 
+## Instalação
+
+### Via APK
+Instale o arquivo `app-debug.apk` diretamente no dispositivo Android.
+
+### Via Código Fonte
 ```bash
-# Clone the repository
-git clone <repository-url>
+# Clone o repositório
+git clone https://github.com/seu-usuario/tic-tac-toe.git
 
-# Open in Android Studio or build from command line
+# Abra no Android Studio ou build via linha de comando
 ./gradlew assembleDebug
 ```
 
-## Output
+## Screenshots
 
-Debug APK will be generated at:
-`app/build/outputs/apk/debug/app-debug.apk`
+O app possui interface com:
+- Título "JOGO DA VELHA" em dourado
+- Placar para Player X e Player O
+- Tabuleiro 3x3 com células interativas
+- Botões de controle: NOVO, AI, LVL
+- Modo AI com indicador de dificuldade
 
-## Technology Stack
-
-- **Jetpack Compose** - Modern declarative UI
-- **Material Design 3** - Latest Material components
-- **Kotlin Coroutines** - Asynchronous programming
-- **StateFlow** - Reactive state management
-- **ViewModel** - Lifecycle-aware UI state
-
-## License
+## Licença
 
 MIT License

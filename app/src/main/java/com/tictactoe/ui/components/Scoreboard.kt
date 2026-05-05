@@ -2,6 +2,7 @@ package com.tictactoe.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,18 +17,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tictactoe.viewmodel.Player
+import com.tictactoe.model.Player
+import com.tictactoe.util.AIDifficulty
 
 @Composable
 fun Scoreboard(
     player1Score: Int,
     player2Score: Int,
     currentPlayer: Player,
+    isPvPMode: Boolean,
+    aiDifficulty: AIDifficulty = AIDifficulty.MEDIUM,
     onRestart: () -> Unit,
+    onModeChange: () -> Unit,
+    onDifficultyChange: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -37,60 +42,64 @@ fun Scoreboard(
             .background(Color(0xFF1A1A2E))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "JOGO DA VELHA",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFD700),
-            letterSpacing = 4.sp
+        TitleText()
+
+        ScoreRow(player1Score, player2Score, currentPlayer)
+
+        if (!isPvPMode) {
+            ModeIndicator(isPvPMode, aiDifficulty)
+        }
+
+        ButtonRow(onRestart, onModeChange, onDifficultyChange, isPvPMode)
+    }
+}
+
+@Composable
+private fun TitleText() {
+    Text(
+        text = "JOGO DA VELHA",
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFFFFD700),
+        letterSpacing = 4.sp
+    )
+}
+
+@Composable
+private fun ScoreRow(
+    player1Score: Int,
+    player2Score: Int,
+    currentPlayer: Player
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(0.dp))
+            .background(Color(0xFF16213E))
+            .border(2.dp, Color(0xFF4A4A6A))
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        PlayerScoreRetro(
+            player = "X",
+            score = player1Score,
+            isActive = currentPlayer == Player.X,
+            color = Color(0xFF6366F1)
         )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(0.dp))
-                .background(Color(0xFF16213E))
-                .border(2.dp, Color(0xFF4A4A6A))
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            PlayerScoreRetro(
-                player = "X",
-                score = player1Score,
-                isActive = currentPlayer == Player.X,
-                color = Color(0xFF6366F1)
-            )
-            Text(
-                text = "VS",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF4A4A6A)
-            )
-            PlayerScoreRetro(
-                player = "O",
-                score = player2Score,
-                isActive = currentPlayer == Player.O,
-                color = Color(0xFFEC4899)
-            )
-        }
-
-        Button(
-            onClick = onRestart,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4A4A6A)
-            ),
-            shape = RoundedCornerShape(0.dp)
-        ) {
-            Text(
-                text = "NOVO JOGO",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
+        Text(
+            text = "VS",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF4A4A6A)
+        )
+        PlayerScoreRetro(
+            player = "O",
+            score = player2Score,
+            isActive = currentPlayer == Player.O,
+            color = Color(0xFFEC4899)
+        )
     }
 }
 
@@ -101,9 +110,7 @@ private fun PlayerScoreRetro(
     isActive: Boolean,
     color: Color
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "PLAYER $player",
             fontSize = 14.sp,
@@ -115,6 +122,77 @@ private fun PlayerScoreRetro(
             fontSize = 32.sp,
             color = color,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun ModeIndicator(isPvPMode: Boolean, aiDifficulty: AIDifficulty) {
+    val modeText = "AI (${aiDifficulty.name})"
+    val modeColor = Color(0xFFEC4899)
+
+    Text(
+        text = modeText,
+        fontSize = 12.sp,
+        color = modeColor,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+private fun ButtonRow(
+    onRestart: () -> Unit,
+    onModeChange: () -> Unit,
+    onDifficultyChange: () -> Unit,
+    isPvPMode: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+    ) {
+        RetroButton(text = "NOVO", onClick = onRestart)
+
+        if (!isPvPMode) {
+            RetroButton(
+                text = when (isPvPMode) { true -> "PVP" else -> "AI" },
+                onClick = onModeChange,
+                isPrimary = false
+            )
+            RetroButton(
+                text = "LVL",
+                onClick = onDifficultyChange,
+                isPrimary = false
+            )
+        } else {
+            RetroButton(
+                text = "AI",
+                onClick = onModeChange,
+                isPrimary = false
+            )
+        }
+    }
+}
+
+@Composable
+private fun RetroButton(
+    text: String,
+    onClick: () -> Unit,
+    isPrimary: Boolean = true
+) {
+    val bgColor = if (isPrimary) Color(0xFF4A4A6A) else Color(0xFF2D2D4A)
+    val textColor = Color.White
+
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = bgColor),
+        shape = RoundedCornerShape(0.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
 }
