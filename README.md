@@ -22,7 +22,7 @@ Um aplicativo Android de Jogo da Velha com modo PvP (player vs player) e modo Pv
 - Detecção automática de vitória e empate
 - Botão "NOVO" para reiniciar a partida
 - Botão "AI" para alternar entre modo PvP e PvE
-- Botão "LVL" para alterar a dificuldade da IA
+- Botão "LEVEL" para alterar a dificuldade da IA
 - Suporte a Android 7.0+ (API 24+)
 
 ### Tecnologia
@@ -60,7 +60,7 @@ O app possui interface com:
 - Título "JOGO DA VELHA" em dourado
 - Placar para Player X e Player O
 - Tabuleiro 3x3 com células interativas
-- Botões de controle: NOVO, AI, LVL
+- Botões de controle: NOVO, AI, LEVEL
 - Modo AI com indicador de dificuldade
 
 ## Licença

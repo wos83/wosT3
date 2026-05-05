@@ -5,27 +5,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.tictactoe.viewmodel.CellState
-import com.tictactoe.viewmodel.Player
+import com.tictactoe.model.Cell
+import com.tictactoe.model.Player
 import org.junit.Assert.*
 
 @Composable
 fun verifyBoardState(
-    board: List<CellState>,
-    onCellClick: (Int) -> Unit,
-    winningLine: List<Int>?,
+    board: List<List<Cell>>,
+    onCellClick: (Int, Int) -> Unit,
+    winningLine: List<Pair<Int, Int>>?,
     isGameOver: Boolean,
     winner: Player?
 ) {
-    assertEquals(9, board.size)
-    assertTrue(onCellClick is Function1<*, *>)
+    assertEquals(9, board.size * board[0].size)
+    assertTrue(onCellClick is Function2<*, *, *>)
     assertTrue(isGameOver is Boolean)
 }
 
-fun verifyEmptyBoard(board: List<CellState>) {
-    assertEquals(9, board.size)
-    board.forEach { cell ->
-        assertEquals(CellState.EMPTY, cell)
+fun verifyEmptyBoard(board: List<List<Cell>>) {
+    assertEquals(3, board.size)
+    board.forEach { row ->
+        row.forEach { cell ->
+            assertNull(cell.player)
+        }
     }
 }
 

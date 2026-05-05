@@ -159,7 +159,7 @@ private fun ButtonRow(
                 isPrimary = false
             )
             RetroButton(
-                text = "LVL",
+                text = "LEVEL",
                 onClick = onDifficultyChange,
                 isPrimary = false
             )

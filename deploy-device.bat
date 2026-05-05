@@ -33,7 +33,7 @@ if %ERRORLEVEL% neq 0 (
 
 echo.
 echo [3] Iniciando app...
-adb -s %DEVICE_ID% shell am start -n com.tictactoe/.MainActivity
+adb -s %DEVICE_ID% shell am start -n com.tictactoe.jogodavelha.debug/com.tictactoe.MainActivity
 
 echo.
 echo ========================================
