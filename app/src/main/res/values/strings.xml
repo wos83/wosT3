@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Jogo da Velha</string>
+    <string name="app_name_full">Tic Tac Toe</string>
+    <string name="player_x">Jogador X</string>
+    <string name="player_o">Jogador O</string>
+    <string name="player_x_wins">Jogador X Venceu!</string>
+    <string name="player_o_wins">Jogador O Venceu!</string>
+    <string name="draw">Empate!</string>
+    <string name="new_game">Novo Jogo</string>
+    <string name="score">Placar</string>
+    <string name="tap_to_play">Toque para jogar</string>
+    <string name="copyright">© 2024 Pixel Labs</string>
+</resources>
