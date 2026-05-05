@@ -32,6 +32,9 @@ Um aplicativo Android de Jogo da Velha com modo PvP (player vs player) e modo Pv
 - MVVM Architecture
 - Minimax Algorithm para IA
 - Armazenamento local para placar
+- Gradle 9.4.1
+- Android SDK 36
+- Kotlin 2.0.21
 
 ## Como Jogar
 
@@ -42,17 +45,62 @@ Um aplicativo Android de Jogo da Velha com modo PvP (player vs player) e modo Pv
 
 ## Instalação
 
-### Via APK
-Instale o arquivo `app-debug.apk` diretamente no dispositivo Android.
+### Via APK (Pasta deploy)
+O arquivo APK já compilado está disponível na pasta `deploy/`:
+```
+deploy/wost3-YYMMDD-HHMM.apk
+```
 
 ### Via Código Fonte
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/tic-tac-toe.git
+git clone https://github.com/wos83/wosT3.git
 
-# Abra no Android Studio ou build via linha de comando
-./gradlew assembleDebug
+# Build via linha de comando
+gradlew.bat assembleDebug
 ```
+
+## Scripts de Deployment
+
+O projeto possui 3 scripts batch para automatizar o build e deployment:
+
+### 1. build-apk.bat
+Gera o arquivo APK de instalação e salva na pasta `deploy/`.
+
+**Uso:**
+```batch
+build-apk.bat
+```
+
+**Saída:**
+- Arquivo: `deploy/wost3-YYMMDD-HHMM.apk`
+
+### 2. deploy-github.bat
+Faz o deploy do código fonte para o repositório GitHub.
+
+**Uso:**
+```batch
+deploy-github.bat
+```
+
+**Funcionalidades:**
+- Limpa arquivos temporários de build (.gradle, .idea, build)
+- Limpa arquivos temporários de IDE
+- Faz commit com informações do sistema (machine, user, IP, MAC, CPU, RAM)
+- Pull com rebase
+- Push para branch develop
+
+### 3. release-github.bat
+Cria uma tag e release no GitHub.
+
+**Uso:**
+```batch
+release-github.bat
+```
+
+**Saída:**
+- Tag: `vYYMMDD-HHMM` (ex: v260505-1628)
+- Release no GitHub com nome "Release vYYMMDD-HHMM"
 
 ## Screenshots
 
@@ -62,6 +110,14 @@ O app possui interface com:
 - Tabuleiro 3x3 com células interativas
 - Botões de controle: NOVO, AI, LEVEL
 - Modo AI com indicador de dificuldade
+
+## Requisitos de Build
+
+- Java 25 (JDK 25)
+- Gradle 9.4.1 (incluído no wrapper)
+- Android SDK 36
+- Kotlin 2.0.21
+- Windows (para executar os scripts .bat)
 
 ## Licença
 

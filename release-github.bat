@@ -1,13 +1,5 @@
 @echo off
 setlocal EnableDelayedExpansion
-chcp 1252 >nul
-
-:: ============================================
-:: CONFIGURAÇÕES
-:: ============================================
-set "repoOwner=wos83"
-set "repoName=wosT3"
-set "branch=develop"
 
 echo ========================================
 echo GITHUB RELEASE GENERATOR
@@ -17,11 +9,10 @@ echo.
 :: ============================================
 :: VERIFICA GH CLI
 :: ============================================
-
 gh --version >nul 2>&1
-if errorlevel 1 (
-    echo ERRO: GitHub CLI (gh) nao encontrado
-    echo Instale em: https://cli.github.com
+if %errorlevel% neq 0 (
+    echo [ERROR] GitHub CLI not found
+    echo Install at: https://cli.github.com
     pause
     exit /b 1
 )
@@ -29,84 +20,119 @@ if errorlevel 1 (
 :: ============================================
 :: VERIFICA GIT
 :: ============================================
-
 git --version >nul 2>&1
-if errorlevel 1 (
-    echo ERRO: Git nao encontrado
+if %errorlevel% neq 0 (
+    echo [ERROR] Git not found
     pause
     exit /b 1
 )
 
 :: ============================================
-:: GERA TAG BASEADO EM DATA/HORA
+:: VERIFICA AUTENTICACAO GH
 :: ============================================
+gh auth status >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] Not authenticated with GitHub
+    echo Run: gh auth login
+    pause
+    exit /b 1
+)
 
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyMMdd"') do set dateTag=%%i
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format HHmm"') do set timeTag=%%i
-
-set "tagName=v%dateTag%-%timeTag%"
+:: ============================================
+:: GERA TAG AUTOMATICA
+:: ============================================
+echo Generating tag...
+for /f "tokens=*" %%a in ('powershell -NoProfile -Command "Get-Date -Format yyMMdd-HHmm"') do set "tagRaw=%%a"
+set "tagName=v%tagRaw%"
 set "releaseName=Release %tagName%"
 
+echo.
+echo ========================================
 echo Tag: %tagName%
-echo Release: %releaseName%
+echo Release Name: %releaseName%
+echo ========================================
 echo.
 
 :: ============================================
 :: VERIFICA SE TAG JA EXISTE
 :: ============================================
+echo Checking if tag exists...
 
-git tag -l %tagName% >nul 2>&1
-if not errorlevel 1 (
-    echo ERRO: Tag %tagName% ja existe
-    pause
-    exit /b 1
+:: Verifica local
+set "localExists=0"
+for /f "tokens=*" %%a in ('git tag -l %tagName% 2^>nul') do set "localExists=1"
+
+:: Verifica remote
+set "remoteExists=0"
+for /f "tokens=*" %%a in ('git ls-remote --tags origin %tagName% 2^>nul') do set "remoteExists=1"
+
+if %localExists% equ 1 (
+    echo [WARNING] Tag already exists locally
+    echo Deleting local tag...
+    git tag -d %tagName% 2>nul
+)
+
+if %remoteExists% equ 1 (
+    echo [WARNING] Tag already exists on remote
+    echo Deleting remote tag...
+    git push origin --delete %tagName% 2>nul
 )
 
 :: ============================================
-:: CRIA TAG
+:: CRIA TAG LOCAL
 :: ============================================
-
-echo Criando tag %tagName%...
+echo.
+echo Creating tag %tagName%...
 git tag %tagName%
-
-if errorlevel 1 (
-    echo ERRO ao criar tag
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to create tag
     pause
     exit /b 1
 )
+echo [OK] Tag created locally
 
 :: ============================================
-:: PUSH TAG
+:: ENVIA TAG PARA REMOTE
 :: ============================================
-
-echo Enviando tag para GitHub...
+echo.
+echo Pushing tag to GitHub...
 git push origin %tagName%
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to push tag
+    pause
+    exit /b 1
+)
+echo [OK] Tag pushed to remote
 
-if errorlevel 1 (
-    echo ERRO ao fazer push da tag
+:: ============================================
+:: CRIA RELEASE NO GITHUB
+:: ============================================
+echo.
+echo Creating release on GitHub...
+gh release create %tagName% --title "%releaseName%" --notes "Release %tagName% generated automatically" --target develop
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to create release
+    echo.
+    echo [INFO] Tag was pushed successfully
+    echo You can create release manually at:
+    echo https://github.com/wos83/wosT3/releases/new?tag=%tagName%
     pause
     exit /b 1
 )
 
+echo [OK] Release created
+
 :: ============================================
-:: CRIA RELEASE VIA GH CLI
+:: SUCESSO
 :: ============================================
-
-echo Criando release no GitHub...
-gh release create %tagName% --title "%releaseName%" --notes "Release %tagName% gerada automaticamente" --target %branch%
-
-if errorlevel 1 (
-    echo ERRO ao criar release
-    echo Nota: A tag foi enviada com sucesso, mas o release pode ser criado manualmente
-    pause
-    exit /b 1
-)
-
 echo.
 echo ========================================
-echo RELEASE CONCLUIDO
-echo Tag: %tagName%
-echo Release: %releaseName%
+echo [SUCCESS] RELEASE COMPLETE
+echo ========================================
+echo Tag Name: %tagName%
+echo Release: %tagName%
+echo.
+echo View at: https://github.com/wos83/wosT3/releases/tag/%tagName%
 echo ========================================
 
 pause
