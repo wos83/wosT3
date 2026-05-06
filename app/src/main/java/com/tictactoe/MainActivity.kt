@@ -168,6 +168,7 @@ class GameViewModel : ViewModel() {
             val move = com.tictactoe.util.Minimax.getBestMove(board, aiPlayer, aiDifficulty)
             if (move != null) {
                 com.tictactoe.util.GameLogic.makeMove(board, move.first, move.second, aiPlayer)
+                board = board.copy()
                 playMoveSound()
                 vibrate()
                 updateGameState()
